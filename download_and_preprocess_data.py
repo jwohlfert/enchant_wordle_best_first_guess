@@ -24,9 +24,14 @@ cards = cards.sort_values(by=["released_at"]).drop_duplicates(subset=["name"], k
 cards[["type_line1", "type_line2"]] = cards['type_line'].str.split('//', expand=True)
 cards[["type1", "subtype1"]] = cards['type_line1'].str.split('—', expand=True)
 cards[["type2", "subtype2"]] = cards['type_line2'].str.split('—', expand=True)
+# extract year to separate column
+cards["release_year"] = pd.to_datetime(cards["released_at"]).dt.year
 # save a csv of set names and release dates for reference
-cards[["set_name", "released_at"]].drop_duplicates().to_json(p / 'set_release_dates.json', orient="records", index=False)
-cards[["set_name", "released_at"]].drop_duplicates().to_csv(p / 'set_release_dates.csv', index=False)
-cards[["name", "cmc", "color_identity", "rarity", "type1", "subtype1", "set_name", "released_at"]].to_json(
+set_release_list = ["set_name", "released_at", "release_year"]
+cards[set_release_list].drop_duplicates().to_json(p / 'set_release_dates.json', orient="records", index=False)
+cards[set_release_list].drop_duplicates().to_csv(p / 'set_release_dates.csv', index=False)
+main_file_column_list = ["name", "cmc", "color_identity", "rarity", "type1", "subtype1", "set_name", "released_at",
+                         "release_year"]
+cards[main_file_column_list].to_json(
     p / "cards-first-printing-scryfall.json", orient="records"
 )
