@@ -5,18 +5,7 @@ def list_compare(list1, list2):
     return set(list1) == set(list2)
 
 
-cards = pd.read_json("data/default-cards-scryfall.json")
-print(cards.columns)
-# Setting the len of set names to 3 should eliminate the custom sets that scryfall creates behind the scenes for
-#   organization of special cards
-cards = cards[cards["set"].str.len() == 3]
-# This line selects only the first printing of a given card, which is the printing the game cares about
-cards = cards.sort_values(by=["released_at"]).drop_duplicates(subset=["name"], keep="first", ignore_index=True)
-# these lines break up the type lines for one and two type cards, and isolate the type and subtype fields
-cards[["type_line1", "type_line2"]] = cards['type_line'].str.split('//', expand=True)
-cards[["type1", "subtype1"]] = cards['type_line1'].str.split('—', expand=True)
-cards[["type2", "subtype2"]] = cards['type_line2'].str.split('—', expand=True)
-
+cards = pd.read_json("data/cards-first-printing-scryfall.json")
 
 # find the "middle-most" set(s) chronologically
 set_list = cards.set_name.unique()
@@ -56,7 +45,4 @@ common_rarity = rarity_count.index[0]
 print(f"Most Common Rarity: {common_rarity}")
 
 full_card_filter = color_identity_filter & (cards["rarity"] == common_rarity)
-print(cards[full_card_filter][["name", "set_name"]])
-# the above process leads to results in the case that the median set is 'Khans of Tarkir'
-
-cards[["set_name", "released_at"]].drop_duplicates().to_csv('data/set_release_dates.csv', index=False)
+print(cards[full_card_filter][["name", "cmc", "color_identity", "rarity", "type1", "subtype1", "set_name"]])
